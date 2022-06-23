@@ -1,6 +1,7 @@
-﻿using Meets.BL.Services;
+﻿using Meets.BL.Entities;
+using Meets.BL.Services;
 
-namespace Meets.BL.Entities
+namespace Meets.BL.Controllers
 {
     //Controller
     public class Calendar
@@ -15,6 +16,16 @@ namespace Meets.BL.Entities
         public Result CreateMeeting(string name, DateTime startDate, DateTime endDate)
         {
             return _meetingService.EnrollMeeting(name, startDate, endDate);
+        }
+
+        public Result<IEnumerable<Meeting>> GetMeetingsByDay(DateOnly date, bool sorted)
+        {
+            return _meetingService.GetMeetingByDay(date, sorted);
+        }
+
+        public Result RemoveMeeting(Meeting meeting)
+        {
+            return _meetingService.Remove(meeting);
         }
     }
 }

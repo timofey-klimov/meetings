@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Meets.BL.Entities
+﻿namespace Meets.BL.Entities
 {
     public class Result : ValueObject
     {
@@ -23,7 +17,29 @@ namespace Meets.BL.Entities
 
         public override IEnumerable<object> GetEqualityComponents()
         {
-            throw new NotImplementedException();
+            yield return Success;
+            yield return ReasonPhrase;
+        }
+    }
+
+    public class Result<T> : Result
+    {
+        public T Value { get; }
+
+        public Result(bool success, string reason, T value)
+            : base(success, reason)
+        {
+            Value = value;
+        }
+
+        public static Result<T> Ok(T value) => new Result<T>(true, string.Empty, value);
+        public static Result<T> Fault(string reason) => new Result<T>(false, reason, default);
+
+        public override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Success;
+            yield return ReasonPhrase;
+            yield return Value;
         }
     }
 }

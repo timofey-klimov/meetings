@@ -8,10 +8,13 @@
 
         public MeetingTime MeetingEndTime { get; private set; }
 
+        public TimeOnly? RemindForTime { get; private set; }
+
         public Meeting(
             string name,
             DateTime startTime,
-            DateTime endTime)
+            DateTime endTime,
+            int? remindForInMinutes = null)
         {
             if (startTime < DateTime.Now)
                 throw new ArgumentException("Invalid startTime", nameof(startTime));
@@ -28,6 +31,10 @@
             Name = name;
             MeetingStartTime = MeetingTime.CreateFromDateTime(startTime);
             MeetingEndTime = MeetingTime.CreateFromDateTime(endTime);
+            RemindForTime =
+                remindForInMinutes != null 
+                    ? MeetingStartTime.Time.AddMinutes(-remindForInMinutes.Value)
+                    : default(TimeOnly?);
         }
 
         public bool IsIntersect(Meeting meeting)
@@ -70,6 +77,13 @@
             yield return Name;
             yield return MeetingStartTime;
             yield return MeetingEndTime;
+        }
+
+        public override string ToString()
+        {
+            return $"Встреча {Name}" +
+                $"Дата {MeetingStartTime.Date.ToShortDateString()} " +
+                $"Время {MeetingStartTime.Time.ToShortTimeString()} - {MeetingEndTime.Time.ToShortTimeString()}";
         }
     }
 }

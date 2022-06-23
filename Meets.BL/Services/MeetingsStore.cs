@@ -1,28 +1,46 @@
 ﻿using Meets.BL.Entities;
+using System.Collections.Concurrent;
 
 namespace Meets.BL.Services
 {
     public class MeetingsStore : IMeetingsStore
     {
-        private readonly Dictionary<DateOnly, ICollection<Meeting>> _store;
+        private readonly ConcurrentDictionary<DateOnly, ICollection<Meeting>> _store;
 
         public MeetingsStore()
         {
-            _store = new Dictionary<DateOnly, ICollection<Meeting>>();
+            _store = new ConcurrentDictionary<DateOnly, ICollection<Meeting>>();
         }
 
-        public IEnumerable<Meeting> GetMeetingByDate(DateOnly date)
+        public IEnumerable<Meeting> GetMeetingByDate(DateOnly date, bool sorted = false)
         {
-            return _store.Keys.Contains(date) ? _store[date] : Array.Empty<Meeting>();
+            var meetings = _store.Keys.Contains(date) ? _store[date] : Array.Empty<Meeting>();
+
+            return sorted ? meetings.OrderBy(x => x.MeetingStartTime.Date) : meetings;
         }
 
 
         public void Add(Meeting meeting)
         {
-            if (_store.Keys.Contains(meeting.MeetingStartTime.Date))
-                _store[meeting.MeetingStartTime.Date].Add(meeting);
-            else
-                _store.Add(meeting.MeetingStartTime.Date, new List<Meeting>() { meeting });
+            _store.AddOrUpdate(meeting.MeetingStartTime.Date,
+                x => new List<Meeting>() { meeting },
+                (x, y) =>
+                {
+                    y.Add(meeting);
+                    return y;
+                });
+        }
+
+        public bool Remove(Meeting meeting)
+        {
+            var meetings = _store[meeting.MeetingStartTime.Date];
+
+            return meetings.Remove(meeting);
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

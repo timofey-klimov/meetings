@@ -49,5 +49,14 @@
             yield return Date;
             yield return Time;
         }
+
+        public string GetDateToShortString() => Date.ToShortDateString();
+
+        public string GetTimeToShortlString() => Time.ToShortTimeString();
+
+        public override string ToString()
+        {
+            return $"{Date.ToShortDateString()} {Time.ToShortTimeString()}";
+        }
     }
 }
